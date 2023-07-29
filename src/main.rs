@@ -11,10 +11,10 @@ fn main() {
     loop {
         match connection.recv_event() {
             Ok(Event::MessageCreate(message)) => {
-                if message.content.contains("https://twitter.com") {
+                if message.content.contains("https://twitter.com/") {
                     let reply = message.content.replace("twitter.com", "fxtwitter.com");
                     let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(message.channel_id, &format!("{} sent {reply}", message.author.mention()), "", false);
+                    let _ = discord.send_message(message.channel_id, &format!("{} sent `{reply}`", message.author.mention()), "", false);
                 }
             }
             Ok(_) => {}
