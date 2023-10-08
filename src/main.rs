@@ -14,7 +14,22 @@ fn main() {
                 if message.content.contains("https://twitter.com/") {
                     let reply = message.content.replace("twitter.com", "fxtwitter.com");
                     let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(message.channel_id, &format!("{} sent `{reply}`", message.author.mention()), "", false);
+                    let _ = discord.send_message(
+                        message.channel_id,
+                        &format!("{} sent {reply}", message.author.mention()),
+                        "",
+                        false,
+                    );
+                }
+                if message.content.contains("https://x.com") {
+                    let reply = message.content.replace("x.com", "fixupx.com");
+                    let _ = discord.delete_message(message.channel_id, message.id);
+                    let _ = discord.send_message(
+                        message.channel_id,
+                        &format!("{} sent {reply}", message.author.mention()),
+                        "",
+                        false,
+                    );
                 }
             }
             Ok(_) => {}
