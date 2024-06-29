@@ -3,7 +3,7 @@ use discord::Discord;
 
 fn main() {
     let discord = Discord::from_bot_token(
-        "MTExODk2NTc4NTM0ODUzODUwOA.GTqGkc.WyEDZrhyw6zn50Iq1w33eRb--qB07CMfQ_A7cI",
+        "TOKEN",
     )
     .expect("Wrong token");
     let (mut connection, _) = discord.connect().expect("connection failed");
@@ -23,6 +23,26 @@ fn main() {
                 }
                 if message.content.contains("https://x.com") {
                     let reply = message.content.replace("x.com", "fixupx.com");
+                    let _ = discord.delete_message(message.channel_id, message.id);
+                    let _ = discord.send_message(
+                        message.channel_id,
+                        &format!("{} sent {reply}", message.author.mention()),
+                        "",
+                        false,
+                    );
+                }
+                if message.content.contains("https://reddit.com") {
+                    let reply = message.content.replace("reddit.com", "rxddit.com");
+                    let _ = discord.delete_message(message.channel_id, message.id);
+                    let _ = discord.send_message(
+                        message.channel_id,
+                        &format!("{} sent {reply}", message.author.mention()),
+                        "",
+                        false,
+                    );
+                }
+                if message.content.contains("https://tiktok.com") {
+                    let reply = message.content.replace("tiktok.com", "vxtiktok.com");
                     let _ = discord.delete_message(message.channel_id, message.id);
                     let _ = discord.send_message(
                         message.channel_id,
