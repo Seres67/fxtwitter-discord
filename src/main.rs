@@ -1,62 +1,48 @@
-use discord::model::Event;
-use discord::Discord;
+use serenity::async_trait;
+use serenity::model::channel::Message;
+use serenity::prelude::*;
 
-fn main() {
-    let discord = Discord::from_bot_token(
-        "TOKEN",
-    )
-    .expect("Wrong token");
-    let (mut connection, _) = discord.connect().expect("connection failed");
+struct RewriteURLHandler;
 
-    loop {
-        match connection.recv_event() {
-            Ok(Event::MessageCreate(message)) => {
-                if message.content.contains("https://twitter.com/") {
-                    let reply = message.content.replace("twitter.com", "fxtwitter.com");
-                    let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(
-                        message.channel_id,
-                        &format!("{} sent {reply}", message.author.mention()),
-                        "",
-                        false,
-                    );
-                }
-                if message.content.contains("https://x.com") {
-                    let reply = message.content.replace("x.com", "fixupx.com");
-                    let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(
-                        message.channel_id,
-                        &format!("{} sent {reply}", message.author.mention()),
-                        "",
-                        false,
-                    );
-                }
-                if message.content.contains("https://reddit.com") {
-                    let reply = message.content.replace("reddit.com", "rxddit.com");
-                    let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(
-                        message.channel_id,
-                        &format!("{} sent {reply}", message.author.mention()),
-                        "",
-                        false,
-                    );
-                }
-                if message.content.contains("https://tiktok.com") {
-                    let reply = message.content.replace("tiktok.com", "vxtiktok.com");
-                    let _ = discord.delete_message(message.channel_id, message.id);
-                    let _ = discord.send_message(
-                        message.channel_id,
-                        &format!("{} sent {reply}", message.author.mention()),
-                        "",
-                        false,
-                    );
-                }
-            }
-            Ok(_) => {}
-            Err(discord::Error::Closed(code, body)) => {
-                println!("connection closed {code:?}: {body}");
-            }
-            Err(err) => println!("Error received {err}"),
+#[async_trait]
+impl EventHandler for RewriteURLHandler {
+    async fn message(&self, ctx: Context, msg: Message) {
+        let reply;
+        if msg.content.contains("https://twitter.com/") {
+            reply = msg.content.replace("twitter.com", "fxtwitter.com");
+        } else if msg.content.contains("https://x.com") {
+            reply = msg.content.replace("x.com", "fixupx.com");
+        } else if msg.content.contains("https://reddit.com") {
+            reply = msg.content.replace("reddit.com", "rxddit.com");
+        } else if msg.content.contains("https://tiktok.com") {
+            reply = msg.content.replace("tiktok.com", "vxtiktok.com");
+        } else {
+            return;
         }
+        if let Err(err) = msg.delete(&ctx).await {
+            println!("Error deleting message: {err:?}");
+        }
+        if let Err(err) = msg
+            .channel_id
+            .say(&ctx, &format!("{} sent {reply}", msg.author.mention()))
+            .await
+        {
+            println!("Error sending message: {err:?}");
+        }
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let token = "TOKEN";
+    let intents = GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
+
+    let mut client = Client::builder(&token, intents)
+        .event_handler(RewriteURLHandler)
+        .await
+        .expect("Err creating client");
+
+    if let Err(why) = client.start().await {
+        println!("Client error: {why:?}");
     }
 }
